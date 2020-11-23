@@ -1,6 +1,8 @@
-# WEB APPLICATION IN NODEJS AND EXPRESS USING EXPRESS GENERATOR, SEQUELIZE, SEQUELIZE-CLI, ASSOCIATIONS AND MIGRATIONS
+# WEB APPLICATION IN NODEJS USING EXPRESS GENERATOR, SEQUELIZE AND SEQUELIZE-CLI.
+![alt text](/public/images/express2.jpg)
 # INTRODUCTION
 *This article uses Express Js for handling Hypertext Transfer Protocol(HTTP) requests and MYSQL for storing data. Node Js is a platform used for building server side application using Javascript.Express is a flexible Node Js web application framework and provides a set of robust features for web and mobile applications.Developers do not need to build everything from scratch. Our first focus is ExpressJs which is one of the most used packages by developers build web APIs. Lastly, we focus on sequelize which is used to simplify the communication between NodeJs and MYSQL.*
+
 ### REQUIREMENTS
 * Basic Javascript Knowledge
 * Install Node.Js
@@ -10,7 +12,196 @@
 * Install XAMPP 
 * Sequelize 
 * Visual Studio(VS) Code or any other editor
+
 ### PART 1: 
+**CREATING PROJECT USING EXPRESS GENERATOR**
+**STEP 1**
+* Open command prompt. 
+### Command Prompt
+![alt text](/public/images/commandline.png)
+
+**STEP 2**
+* Create a folder for the node project in the location of your choice. Navigate to the folder, and then type
+* Make directory to the name of the folder
+*mkdir fileName*
+*cd fileName*
+*code . to take you to the code editor*
+### 
+![alt text](/public/images/cd.png)
+
+**STEP 3**
+* We run *npx express-generator* inorder to generate the express server
+* We can install express globally for our projects
+*npm install -g express-generator*
+###
+! [alt text](/public/images/express.png)
+*The project is created with series of directories as javascripts, stylesheets, routes, views and with files as package.json, app.js and few other files. This also specifies the next step to be executed (the command to install the dependencies)*
+
+**STEP 4**
+* Install Dependencies
+*npm install*
+###
+! [alt text](/public/images/step3.png)
+*Lets view the package.json file that is created. All the dependencies needed for the project is added here automatically.*
+! [alt text](/public/images/dep.png)
+*A directory with the name node_modules is created in the project folder and all the dependencies are added automatically in node_modules directory. The project setup is ready.*
+*We open the app.js and see what is embedded in it . All the dependencies are invoked by the use of require method.*
+
+### app.js screenshot
+! [alt text](/public/images/app.js.png)
+* The use of modules in app.js:
+* body-parser – A middleware for handling Raw, Text, JSON and URL encoded form data(especially POST data).
+* Cookie-Parser – To parse Cookie header and populate req.cookies with an object keyed by the cookie names.
+* Jade-A template engine . It combines data and the template to produce HTML.
+* express – A web application framework that provides a set of features for web and mobile applications
+* morgan – A HTTP request logger middleware for node.js
+* Now, let’s run our application. Go to the command line
+* Run the server with *npm start*
+* The server gets started and listens to port 3002. Open the browser and load http://localhost:3002. You will get the output as shown below.
+### 
+! [alt text](/public/images/index.png)
+! [alt text](/public/images/run.png)
+
+**STEP 5**
+### CREATE A MODEL FOLDER
+* In the model folder we have the config.js,index.js the user.js file which contains the Schema:
+### config.js
+`require('dotenv').config()
+module.exports = {
+    db: process.env.DB_DATABASE,
+    dialect:process.env.DB_DIALECT,
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    port:process.env.DB_PORT
+}`
+### index.js
+`const connection = require('./config');
+const {Sequelize} = require('sequelize');
+
+const model = require('./models');
+const { user } = require('./config');
+
+const sequelize = new Sequelize(connection.db, connection.user, connection.password, {
+    host:connection.host,
+    dialect:connection.dialect,
+    port: connection.port
+});
+
+const db ={};
+
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
+
+const Model = new model(sequelize,Sequelize); 
+
+module.exports = db;`
+
+### User model code
+`class Model {
+
+  constructor(sequelize,Sequelize){
+    this.sequelize = sequelize,
+    this.Sequelize = Sequelize
+  }
+
+  User = () =>{
+    return this.sequelize.define('user',{ id:{type:this.Sequelize.INTEGER,allowNull:false,autoIncrement:true,primaryKey:true},
+        firstname:{
+          type:this.Sequelize.STRING,
+          allowNull:false
+        },
+        lastname:{
+          type:this.Sequelize.STRING,
+          allowNull:false
+        },
+        email :{ 
+          type:this.Sequelize.STRING,
+          allowNull:false,
+          // validate:{
+          //   isEmail:true
+          // }
+        },
+        password:{
+          type:this.Sequelize.STRING,
+          allowNull:false,
+          unique:true
+        }
+      }
+    );
+  };`
+
+  **STEP 6**
+  ### CREATING ROUTES
+  * It send request of specfic action to the controller.
+  ### User route
+  `var express = require('express');
+var router = express.Router();
+const controller = require('../controllers/user.controller');
+
+router.get('/:id', controller.getUser);
+router.post('/', controller.createUser);
+router.put('/:id', controller.updateUser);
+router.delete('/:id', controller.deleteUser);
+
+module.exports = router;`
+
+**STEP 7**
+  ### CREATE THE USER CONTROLLER
+  * It controls the incoming request,catches error and send back response to the client
+  ### User controller code
+  `const models = require('../models/index');
+
+async function  getUser(req,res){
+  userId = req.params.id;
+  const user = await models.user.findOne({where:{id:userId},attributes:['firstname','lastname']})
+  res.json(user);
+
+}
+
+async function createUser(req,res){
+  var data = req.body;
+  var user, msg;
+  const checkUser = await models.user.findOne({where:{email:data.email}});
+  if (checkUser){
+    msg = "Sorry you already have an account"
+  } else {
+    const user = await models.user.create({firstname:data.firstname, lastname:data.lastname,email:data.email, password:data.password});
+    msg = "Account successfully created"
+  
+  }
+  res.json(msg);
+}
+
+async function updateUser(req,res){
+  userId = req.params.id;
+  var data = req.body;
+  const user = await models.user.update({firstname:data.firstname, lastname:data.lastname,email:data.email, password:data.password},{where:{id:userId}});
+  res.json({msg:'User updated successfully'})
+
+}
+  
+
+async function deleteUser(req,res){
+  userId = req.params.id;
+  const user = await models.user.destroy({where:{id:req.params.id}});
+  res.json({mssg:'user deleted'})
+
+}
+
+module.exports = {
+  getUser,
+  createUser,
+  updateUser,
+  deleteUser
+}`
+
+
+
+### PART 2:
+**EXPRESS-GENERATOR AND SEQUELIZE**
+
+### PART 2A
 **CREATING PROJECT USING EXPRESS GENERATOR**
 **STEP 1**
 * Open command prompt. 
@@ -45,18 +236,246 @@
 * The use of modules in app.js:
 * body-parser – A middleware for handling Raw, Text, JSON and URL encoded form data(especially POST data).
 * Cookie-Parser – To parse Cookie header and populate req.cookies with an object keyed by the cookie names.
-* Jade-A template engine . It combines data and the template to produce HTML.! [alt text](/public/images/app.js.png)
+* Jade-A template engine . It combines data and the template to produce HTML.
 * express – A web application framework that provides a set of features for web and mobile applications
 * morgan – A HTTP request logger middleware for node.js
 * Now, let’s run our application. Go to the command line
 * Run the server with *npm start*
-* The server gets started and listens to port 3002. Open the browser and load http://localhost:3002.You will get the output as shown below.
+* The server gets started and listens to port 3002. Open the browser and load http://localhost:3002. You will get the output as shown below.
 ### 
 ! [alt text](/public/images/index.png)
 ! [alt text](/public/images/run.png)
 
+### PART 2B
+* *Sequelize is an abstraction layer for raw SQL that enables us to use javascript to interact with our database.*
+ **STEP 1**
+ * On the command line we install sequelize
+ *npm i --save sequelize*
+ **STEP 2**
+ * We install MYSQL2 for storing application related information
+ *npm i mysql2*
+ **STEP 3**
+ * We install the sequelize-cli on the command line inorder to take advantage of sequelize's capabilities
+ *npm instal --save-dev sequelize-cli*
+ **STEP 3**
+ * To create an empty project we execute sequelize-cli init on the command line
+ *npx sequelize-cli init*
+ #### It will create the following folders:
+ 1. Config Folder: That contains config file which tells CLI(Command Line Interface) how to connect with database.
+ 2. Models Folder: Contains models for your project.
+ 3. Migrations Folder: Contains all migration files.
+ 4. Seeders: Contains all seed files.
+ **STEP 4**
+ * We create the MYSQL database with this command
+ *npx sequelize-cli db:create*
+ * This database created can be seen on our localhost phpmyAdmin.
+ **STEP 5**
+ * We create a model file  which sequelize will use to organize the information and a migration which sequelize will use to set up the proper tables in our databse.The model files are created based on the schema given.
+ * We create a user model from the command line.
+ *npx sequelize-cli model:generate --name User --attributes firstName:string,lastName:string,email:string,password:string*
+ * We create a task model from the command line.
+ *npx sequelize-cli model:generate --name Task --attributes title:string,userId:integer*
+ **STEP 6**
+ * To commit the User and Task table in the database we run this command:
+ *npx sequelize-cli db:migrate*
+ **STEP 7**
+ * To undo migration we run this on the command line:
+ *npx sequelize-cli db:migrate:undo*
+ **STEP 8**
+ * To manage all migrations we use seeders. Seed files are some changes in data that can be used to populate database table.
+ *npx sequelize-cli seed:generate --name user*
+ *npx sequelize-cli seed:generate --name task*
+ * It create seed file in the seeders folder. It follows the semantics as the migration files.
+ **STEP 9**
+ * We run the command below on the command line for the seed file to be committed to the database
+ *npx sequelize-cli db:seed:all*
+ **STEP 10**
+ * To undo seed from database we run this command
+ *npx sequelize-cli db:seed:undo*
+ **STEP 11**
+ * In the model folder we locate the user.js and task.js. We create their associations.
+ ### User association
+ `'use strict';
+const {
+  Model
+} = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
+    // static associate(models) {
+    //   // define association here
+    // }
+  };
+  User.associate = function(models){
+    User.hasMany(models.Task)
+  }
+  User.init({
+    firstName: DataTypes.STRING,
+    lastName: DataTypes.STRING,
+    email: DataTypes.STRING,
+    password: DataTypes.STRING
+  }, {
+    sequelize,
+    modelName: 'User',
+  });
+  return User;
+};`
+### Task association
+`'use strict';
+const {
+  Model, BelongsTo
+} = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class Task extends Model {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
+    // static associate(models) {
+    //   // define association here
+    // }
+  };
+  Task.associate = function(models){
+    Task.belongsTo(models.User)
+  }
+  Task.init({
+    title: DataTypes.STRING,
+    userId: DataTypes.INTEGER
+  }, {
+    sequelize,
+    modelName: 'Task',
+  });
+  return Task;
+};`
+**STEP 12**
+* We run the command on STEP 6 and STEP 9.
+**STEP 13**
+* we create the task route and make changes in the user route
+### User route
+`var express = require('express');
+var router = express.Router();
+const controller = require('../controllers/user.controller');
 
-### PART 2:
-**SEQUELIZE**
+router.get('/:id', controller.getUser);
+router.post('/', controller.createUser);
+router.put('/:id', controller.updateUser);
+router.delete('/:id', controller.deleteUser);
 
- 
+module.exports = router;`
+### Task route
+`const express = require('express');
+const router = express.Router();
+const taskController = require ('../controllers/task.controller');
+
+router.get ('/', taskController.getTask);
+router.get('/user/:id',taskController.getTasks);
+router.post ('/create/:id', taskController.createTask);
+router.put ('/:id', taskController.updateTask);
+router.delete ('/:id', taskController.deleteTask);
+
+module.exports = router;`
+* The routes send the request to a specific action in the controller and determines the path by which the actions(packets) are forwarded or shared.
+**STEP 14**
+* We create the controllers for user and task that controls the incoming request,catches error and sends back a response to the client.
+### User controller
+`const models = require('../models/index');
+
+async function  getUser(req,res){
+  userId = req.params.id;
+  const user = await models.User.findOne({where:{id:userId},attributes:['firstname','lastname']})
+  res.json(user);
+
+}
+
+async function createUser(req,res){
+  var data = req.body;
+  var user, msg;
+  const checkUser = await models.User.findOne({where:{email:data.email}});
+  if (checkUser){
+    msg = "Sorry you already have an account"
+  } else {
+    const user = await models.User.create({firstname:data.firstname, lastname:data.lastname,email:data.email, password:data.password});
+    msg = "Account successfully created"
+  
+  }
+  res.json(msg);
+}
+
+async function updateUser(req,res){
+  userId = req.params.id;
+  var data = req.body;
+  const user = await models.User.update({firstname:data.firstname, lastname:data.lastname,email:data.email, password:data.password},{where:{id:userId}});
+  res.json({msg:'User updated successfully'})
+
+}
+  
+
+async function deleteUser(req,res){
+  userId = req.params.id;
+  const user = await models.User.destroy({where:{id:req.params.id}});
+  res.json({mssg:'user deleted'})
+
+}
+
+module.exports = {
+  getUser,
+  createUser,
+  updateUser,
+  deleteUser
+}`
+### Task controller
+`const models = require('../models/index');
+
+async function getTask(req, res) {
+    const task = await models.Task.findAll({include:[models.user]});
+    res.json(task);
+}
+async function getTasks(req,res){
+    userId = req.params.id;
+    const tasks = await models.Task.findAndCountAll({where:{userId:userId}})
+    res.json(tasks)
+
+}
+
+async function createTask(req, res) {
+    userId = req.params.id;
+    var data = req.body;
+    const task = await models.Task.create({title:data.title,userId:userId});
+    res.json(task);
+}
+
+async function updateTask(req, res) {
+    var data = req.body;
+     msg = req.params.id;
+    const task = await models.Task.update(res.body,{where: {id:msg}
+    });
+    msg = 'Update Successful'
+    res.json(msg);
+}
+
+async function deleteTask (req, res) {
+    var userId = req.params.id;
+    const task = await models.Task.destroy({where:{id: userId}})
+    res.send('deleted')
+
+}
+
+module.exports = {
+    getTask,
+    getTasks,
+    createTask,
+    updateTask,
+    deleteTask,
+};`
+* GET REQUEST: help us FIND handles.
+* POST REQUEST: help us SAVE handles.
+* UPDATE REQUEST: help us to UPDATE saved handles.
+* DELETE REQUEST: help us to DELETE saved handles.
+* We run our server using *npm start* or by installing Nodemon *npm install --save-dev nodemon* it restart the server.
+* We carry out our actions using POSTMAN. 
+
