@@ -1,4 +1,4 @@
-# WEB APPLICATION IN NODEJS USING EXPRESS GENERATOR, SEQUELIZE AND SEQUELIZE-CLI.
+### WEB APPLICATION IN NODEJS USING EXPRESS GENERATOR, SEQUELIZE AND SEQUELIZE-CLI.
 ![alt text](/public/images/express2.jpg)
 # INTRODUCTION
 *This article uses Express Js for handling Hypertext Transfer Protocol(HTTP) requests and MYSQL for storing data. Node Js is a platform used for building server side application using Javascript.Express is a flexible Node Js web application framework and provides a set of robust features for web and mobile applications.Developers do not need to build everything from scratch. Our first focus is ExpressJs which is one of the most used packages by developers build web APIs. Lastly, we focus on sequelize which is used to simplify the communication between NodeJs and MYSQL.*
@@ -66,17 +66,18 @@
 ### CREATE A MODEL FOLDER
 * In the model folder we have the config.js,index.js the user.js file which contains the Schema:
 ### config.js
-`require('dotenv').config()
-module.exports = {
+```require('dotenv').config()
+    module.exports = {
     db: process.env.DB_DATABASE,
     dialect:process.env.DB_DIALECT,
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     port:process.env.DB_PORT
-}`
+}
+```
 ### index.js
-`const connection = require('./config');
+```const connection = require('./config');
 const {Sequelize} = require('sequelize');
 
 const model = require('./models');
@@ -95,10 +96,10 @@ db.sequelize = sequelize;
 
 const Model = new model(sequelize,Sequelize); 
 
-module.exports = db;`
+module.exports = db;```
 
 ### User model code
-`class Model {
+```class Model {
 
   constructor(sequelize,Sequelize){
     this.sequelize = sequelize,
@@ -129,72 +130,74 @@ module.exports = db;`
         }
       }
     );
-  };`
+  };
+  ```
 
   **STEP 6**
   ### CREATING ROUTES
   * It send request of specfic action to the controller.
   ### User route
-  `var express = require('express');
-var router = express.Router();
-const controller = require('../controllers/user.controller');
+  ```var express = require('express');
+      var router = express.Router();
+      const controller = require('../controllers/user.controller');
 
-router.get('/:id', controller.getUser);
-router.post('/', controller.createUser);
-router.put('/:id', controller.updateUser);
-router.delete('/:id', controller.deleteUser);
+      router.get('/:id', controller.getUser);
+      router.post('/', controller.createUser);
+      router.put('/:id', controller.updateUser);
+      router.delete('/:id', controller.deleteUser);
 
-module.exports = router;`
+      module.exports = router;
+      ```
 
 **STEP 7**
   ### CREATE THE USER CONTROLLER
   * It controls the incoming request,catches error and send back response to the client
   ### User controller code
-  `const models = require('../models/index');
+  ```const models = require('../models/index');
 
-async function  getUser(req,res){
-  userId = req.params.id;
-  const user = await models.user.findOne({where:{id:userId},attributes:['firstname','lastname']})
-  res.json(user);
+      async function  getUser(req,res){
+      userId = req.params.id;
+      const user = await models.user.findOne({where:{id:userId},attributes:['firstname','lastname']})
+      res.json(user);
 
-}
+      }
 
-async function createUser(req,res){
-  var data = req.body;
-  var user, msg;
-  const checkUser = await models.user.findOne({where:{email:data.email}});
-  if (checkUser){
-    msg = "Sorry you already have an account"
-  } else {
-    const user = await models.user.create({firstname:data.firstname, lastname:data.lastname,email:data.email, password:data.password});
-    msg = "Account successfully created"
+      async function createUser(req,res){
+      var data = req.body;
+      var user, msg;
+      const checkUser = await models.user.findOne({where:{email:data.email}});
+      if (checkUser){
+      msg = "Sorry you already have an account"
+      } else {
+      const user = await models.user.create({firstname:data.firstname, lastname:data.lastname,email:data.email, password:data.password});
+      msg = "Account successfully created"
   
-  }
-  res.json(msg);
-}
+      }
+      res.json(msg);
+      }
 
-async function updateUser(req,res){
-  userId = req.params.id;
-  var data = req.body;
-  const user = await models.user.update({firstname:data.firstname, lastname:data.lastname,email:data.email, password:data.password},{where:{id:userId}});
-  res.json({msg:'User updated successfully'})
+      async function updateUser(req,res){
+      userId = req.params.id;
+      var data = req.body;
+      const user = await models.user.update({firstname:data.firstname, lastname:data.lastname,email:data.email, password:data.password},{where:{id:userId}});
+      res.json({msg:'User updated successfully'})
 
-}
-  
+      }
 
-async function deleteUser(req,res){
-  userId = req.params.id;
-  const user = await models.user.destroy({where:{id:req.params.id}});
-  res.json({mssg:'user deleted'})
+      async function deleteUser(req,res){
+      userId = req.params.id;
+      const user = await models.user.destroy({where:{id:req.params.id}});
+      res.json({mssg:'user deleted'})
 
-}
+      }
 
-module.exports = {
-  getUser,
-  createUser,
-  updateUser,
-  deleteUser
-}`
+      module.exports = {
+      getUser,
+      createUser,
+      updateUser,
+      deleteUser
+      }
+      ```
 
 
 
@@ -295,183 +298,183 @@ module.exports = {
  **STEP 11**
  * In the model folder we locate the user.js and task.js. We create their associations.
  ### User association
- `'use strict';
-const {
-  Model
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    // static associate(models) {
-    //   // define association here
-    // }
-  };
-  User.associate = function(models){
-    User.hasMany(models.Task)
-  }
-  User.init({
-    firstName: DataTypes.STRING,
-    lastName: DataTypes.STRING,
-    email: DataTypes.STRING,
-    password: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'User',
-  });
-  return User;
-};`
+ ```'use strict';
+      const {
+      Model
+      } = require('sequelize');
+      module.exports = (sequelize, DataTypes) => {
+      class User extends Model {
+      /**
+      * Helper method for defining associations.
+      * This method is not a part of Sequelize lifecycle.
+      * The `models/index` file will call this method automatically.
+      */
+      // static associate(models) {
+      //   // define association here
+      // }
+      };
+      User.associate = function(models){
+      User.hasMany(models.Task)
+      }
+      User.init({
+      firstName: DataTypes.STRING,
+      lastName: DataTypes.STRING,
+      email: DataTypes.STRING,
+      password: DataTypes.STRING
+      }, {
+      sequelize,
+      modelName: 'User',
+      });
+      return User;
+      };```
 ### Task association
-`'use strict';
-const {
-  Model, BelongsTo
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
-  class Task extends Model {
-    /**
+```'use strict';
+      const {
+      Model, BelongsTo
+      } = require('sequelize');
+      module.exports = (sequelize, DataTypes) => {
+      class Task extends Model {
+      /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    // static associate(models) {
-    //   // define association here
-    // }
-  };
-  Task.associate = function(models){
-    Task.belongsTo(models.User)
-  }
-  Task.init({
-    title: DataTypes.STRING,
-    userId: DataTypes.INTEGER
-  }, {
-    sequelize,
-    modelName: 'Task',
-  });
-  return Task;
-};`
+      // static associate(models) {
+      //   // define association here
+      // }
+      };
+      Task.associate = function(models){
+      Task.belongsTo(models.User)
+      }
+      Task.init({
+      title: DataTypes.STRING,
+      userId: DataTypes.INTEGER
+      }, {
+      sequelize,
+      modelName: 'Task',
+      });
+      return Task;
+      };```
 **STEP 12**
 * We run the command on STEP 6 and STEP 9.
 **STEP 13**
 * we create the task route and make changes in the user route
 ### User route
-`var express = require('express');
-var router = express.Router();
-const controller = require('../controllers/user.controller');
+```var express = require('express');
+    var router = express.Router();
+    const controller = require('../controllers/user.controller');
 
-router.get('/:id', controller.getUser);
-router.post('/', controller.createUser);
-router.put('/:id', controller.updateUser);
-router.delete('/:id', controller.deleteUser);
+    router.get('/:id', controller.getUser);
+    router.post('/', controller.createUser);
+    router.put('/:id', controller.updateUser);
+    router.delete('/:id', controller.deleteUser);
 
-module.exports = router;`
+    module.exports = router;```
 ### Task route
-`const express = require('express');
-const router = express.Router();
-const taskController = require ('../controllers/task.controller');
+```const express = require('express');
+    const router = express.Router();
+    const taskController = require ('../controllers/task.controller');
 
-router.get ('/', taskController.getTask);
-router.get('/user/:id',taskController.getTasks);
-router.post ('/create/:id', taskController.createTask);
-router.put ('/:id', taskController.updateTask);
-router.delete ('/:id', taskController.deleteTask);
+    router.get ('/', taskController.getTask);
+    router.get('/user/:id',taskController.getTasks);
+    router.post ('/create/:id', taskController.createTask);
+    router.put ('/:id', taskController.updateTask);
+    router.delete ('/:id', taskController.deleteTask);
 
-module.exports = router;`
+    module.exports = router;```
 * The routes send the request to a specific action in the controller and determines the path by which the actions(packets) are forwarded or shared.
 **STEP 14**
 * We create the controllers for user and task that controls the incoming request,catches error and sends back a response to the client.
 ### User controller
-`const models = require('../models/index');
+```const models = require('../models/index');
 
-async function  getUser(req,res){
-  userId = req.params.id;
-  const user = await models.User.findOne({where:{id:userId},attributes:['firstname','lastname']})
-  res.json(user);
+    async function  getUser(req,res){
+    userId = req.params.id;
+    const user = await models.User.findOne({where:{id:userId},attributes:['firstname','lastname']})
+    res.json(user);
 
-}
+    }
 
-async function createUser(req,res){
-  var data = req.body;
-  var user, msg;
-  const checkUser = await models.User.findOne({where:{email:data.email}});
-  if (checkUser){
+    async function createUser(req,res){
+    var data = req.body;
+    var user, msg;
+    const checkUser = await models.User.findOne({where:{email:data.email}});
+    if (checkUser){
     msg = "Sorry you already have an account"
-  } else {
+    } else {
     const user = await models.User.create({firstname:data.firstname, lastname:data.lastname,email:data.email, password:data.password});
     msg = "Account successfully created"
   
-  }
-  res.json(msg);
-}
+    }
+    res.json(msg);
+    }
 
-async function updateUser(req,res){
-  userId = req.params.id;
-  var data = req.body;
-  const user = await models.User.update({firstname:data.firstname, lastname:data.lastname,email:data.email, password:data.password},{where:{id:userId}});
-  res.json({msg:'User updated successfully'})
+    async function updateUser(req,res){
+    userId = req.params.id;
+    var data = req.body;
+    const user = await models.User.update({firstname:data.firstname, lastname:data.lastname,email:data.email, password:data.password},{where:{id:userId}});
+    res.json({msg:'User updated successfully'})
 
-}
+    }
   
 
-async function deleteUser(req,res){
-  userId = req.params.id;
-  const user = await models.User.destroy({where:{id:req.params.id}});
-  res.json({mssg:'user deleted'})
+    async function deleteUser(req,res){
+    userId = req.params.id;
+    const user = await models.User.destroy({where:{id:req.params.id}});
+    res.json({mssg:'user deleted'})
 
-}
+    }
 
-module.exports = {
-  getUser,
-  createUser,
-  updateUser,
-  deleteUser
-}`
+    module.exports = {
+    getUser,
+    createUser,
+    updateUser,
+    deleteUser
+    }```
 ### Task controller
-`const models = require('../models/index');
+```const models = require('../models/index');
 
-async function getTask(req, res) {
+    async function getTask(req, res) {
     const task = await models.Task.findAll({include:[models.user]});
     res.json(task);
-}
-async function getTasks(req,res){
+    }
+    async function getTasks(req,res){
     userId = req.params.id;
     const tasks = await models.Task.findAndCountAll({where:{userId:userId}})
     res.json(tasks)
 
-}
+    }
 
-async function createTask(req, res) {
+    async function createTask(req, res) {
     userId = req.params.id;
     var data = req.body;
     const task = await models.Task.create({title:data.title,userId:userId});
     res.json(task);
-}
+    }
 
-async function updateTask(req, res) {
+    async function updateTask(req, res) {
     var data = req.body;
      msg = req.params.id;
-    const task = await models.Task.update(res.body,{where: {id:msg}
-    });
-    msg = 'Update Successful'
-    res.json(msg);
-}
+     const task = await models.Task.update(res.body,{where: {id:msg}
+      });
+      msg = 'Update Successful'
+      res.json(msg);
+      }
 
-async function deleteTask (req, res) {
-    var userId = req.params.id;
-    const task = await models.Task.destroy({where:{id: userId}})
-    res.send('deleted')
+      async function deleteTask (req, res) {
+      var userId = req.params.id;
+      const task = await models.Task.destroy({where:{id: userId}})
+      res.send('deleted')
 
-}
+      }
 
-module.exports = {
-    getTask,
-    getTasks,
-    createTask,
-    updateTask,
-    deleteTask,
-};`
+      module.exports = {
+      getTask,
+      getTasks,
+      createTask,
+      updateTask,
+      deleteTask,
+      };```
 * GET REQUEST: help us FIND handles.
 * POST REQUEST: help us SAVE handles.
 * UPDATE REQUEST: help us to UPDATE saved handles.
